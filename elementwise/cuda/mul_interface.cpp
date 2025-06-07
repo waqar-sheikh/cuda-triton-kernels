@@ -9,7 +9,7 @@ torch::Tensor cuda_mul_forward(torch::Tensor a, torch::Tensor b) {
     TORCH_CHECK(a.device().is_cuda(), "Tensor a must be on CUDA");
     TORCH_CHECK(b.device().is_cuda(), "Tensor b must be on CUDA");
     TORCH_CHECK(a.sizes() == b.sizes(), "Tensor sizes must match");
-    TORCH_CHECK(a.dtype() == torch::kFloat32, "Tensors must be float32");
+    TORCH_CHECK(a.dtype() == torch::kFloat32 && b.dtype() == torch::kFloat32, "Tensors must be float32");
 
     auto out = torch::empty_like(a);
     launch_mul_forward(a.data_ptr<float>(), b.data_ptr<float>(), out.data_ptr<float>(), a.numel());
