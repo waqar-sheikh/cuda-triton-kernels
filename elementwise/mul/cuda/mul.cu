@@ -14,8 +14,8 @@ void mul_backward(const float* grad_out, const float* a, const float* b, float* 
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx < size) {
-        grad_a[idx] = grad_out[idx] * b[idx]; // dL/da = grad_out * b
-        grad_b[idx] = grad_out[idx] * a[idx]; // dL/db = grad_out * a
+        grad_a[idx] = grad_out[idx] * b[idx];
+        grad_b[idx] = grad_out[idx] * a[idx];
     }
 }
 
