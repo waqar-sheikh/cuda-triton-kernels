@@ -16,12 +16,12 @@ void softmax(const float *input, float *output, const int nrows, const int ncols
         }
         
         for (int i = start_idx; i < start_idx + ncols; i ++) {
-            output[i] = expf(input[i] - row_max);
-            row_sum += output[i];
+            float expval = expf(input[i] - row_max);
+            row_sum += expval;
         }
         
         for (int i = start_idx; i < start_idx + ncols; i ++) {
-            output[i] = (output[i] / row_sum);
+            output[i] = (expf(input[i] - row_max) / row_sum);
         }
     }
 }
