@@ -19,6 +19,12 @@ ext = load_inline(
 )
 
 class Softmax(autograd.Function):
+    _impl = 'naive'
+
     @staticmethod
     def forward(ctx, input):
-        return ext.cuda_softmax_forward(input)
+        return ext.cuda_softmax_forward(input, Softmax._impl)
+    
+    @staticmethod
+    def use(impl):
+        Softmax._impl = impl

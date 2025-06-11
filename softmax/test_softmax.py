@@ -11,6 +11,13 @@ def softmax_forward_test(SoftmaxFunction):
     assert torch.allclose(output, expected, rtol=1e-4, atol=1e-6), "Forward pass results do not match!"
 
 
-def test_cuda_softmax_forward():
-    """Test the forward pass of the CUDA softmax kernel."""
+def test_cuda_softmax_online():
+    """Test the online CUDA softmax kernel."""
+    SoftmaxCUDA.use("online")
+    softmax_forward_test(SoftmaxCUDA)
+
+
+def test_cuda_softmax_naive():
+    """Test the naive CUDA softmax kernel."""
+    SoftmaxCUDA.use("naive")
     softmax_forward_test(SoftmaxCUDA)
