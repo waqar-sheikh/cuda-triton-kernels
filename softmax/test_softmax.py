@@ -5,10 +5,16 @@ from softmax_cuda import Softmax as SoftmaxCUDA
 
 
 def softmax_forward_test(SoftmaxFunction):
-    input = torch.randn(1024, 128, device="cuda", dtype=torch.float32, requires_grad=True)
+    input = torch.randn(1024, 1024, device="cuda", dtype=torch.float32, requires_grad=True)
     output = SoftmaxFunction.apply(input)
     expected = F.softmax(input, dim=1)
     assert torch.allclose(output, expected, rtol=1e-4, atol=1e-6), "Forward pass results do not match!"
+
+
+def test_cuda_softmax_sharedmem():
+    """Test the shared memory CUDA softmax kernel."""
+    SoftmaxCUDA.use("sharedmem")
+    softmax_forward_test(SoftmaxCUDA)
 
 
 def test_cuda_softmax_online():

@@ -14,25 +14,30 @@ def softmax_baseline(x, dim):
 
 def main():
     # Create input tensor
-    input = torch.randn(1024, 256, device="cuda", dtype=torch.float32)
+    input = torch.randn(1024, 1024, device="cuda", dtype=torch.float32)
 
     # Benchmark baseline softmax()
-    mean, _ = benchmark(softmax_baseline, input, -1, num_steps=10)
-    print(mean / 1e-9)
+    mean = benchmark(softmax_baseline, input, -1, num_steps=10)
+    print("baseline ", mean / 1e-9)
 
     # Benchmark torch.softmax()
-    mean, _ = benchmark(torch.softmax, input, -1, num_steps=10)
-    print(mean / 1e-9)
+    mean = benchmark(torch.softmax, input, -1, num_steps=10)
+    print("torch    ", mean / 1e-9)
 
     # Benchmark naive CUDA softmax kernel
     Softmax.use("naive")
-    mean, _ = benchmark(Softmax.apply, input, num_steps=10)
-    print(mean / 1e-9)
+    mean = benchmark(Softmax.apply, input, num_steps=10)
+    print("naive    ", mean / 1e-9)
 
     # Benchmark online CUDA softmax kernel
     Softmax.use("online")
-    mean, _ = benchmark(Softmax.apply, input, num_steps=10)
-    print(mean / 1e-9)
+    mean = benchmark(Softmax.apply, input, num_steps=10)
+    print("online   ", mean / 1e-9)
+
+    # Benchmark shared mem CUDA softmax kernel
+    Softmax.use("sharedmem")
+    mean = benchmark(Softmax.apply, input, num_steps=10)
+    print("sharedmem", mean / 1e-9)
 
 if __name__ == "__main__":
     main()

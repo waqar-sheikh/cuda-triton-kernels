@@ -1,6 +1,5 @@
 import torch
 import time
-import statistics
 
 def cuda_sync():
     if torch.cuda.is_available():
@@ -20,4 +19,4 @@ def benchmark(func, *args, warmup_steps=10, num_steps=10):
         cuda_sync()
         times.append(time.time() - start)
 
-    return statistics.mean(times), statistics.variance(times)
+    return sum(times) / len(times)
