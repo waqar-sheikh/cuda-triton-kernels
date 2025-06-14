@@ -3,45 +3,58 @@
 __global__
 void softmax_sharedmem(const float *input, float *output, const int nrows, const int ncols) {
     __shared__ float smem[128];
-    __shared__ float max[1];
-    __shared__ float sum[1];
 
     int tid = threadIdx.x;
     int row_start = blockIdx.x * ncols;
     float thread_max = -INFINITY;
+    float thread_sum = 0;
 
     for (int i = row_start + tid; i < row_start + ncols; i += blockDim.x) {
         float elem = input[i];
-        if (elem > thread_max)
+        if (elem > thread_max) {
+            thread_sum *= expf(thread_max - elem);
             thread_max = elem;
+        }
+        thread_sum += expf(elem - thread_max);
     }
     smem[tid] = thread_max;
     __syncthreads();
 
-    if (tid == 0) {
-        for (int i = 0; i < blockDim.x; i ++) {
-            if (smem[i] > max[0])
-                max[0] = smem[i];
+    int n_reduce = blockDim.x;
+    while(n_reduce > 0) {
+        if (tid < n_reduce/2) {
+            for (int i = tid; i < n_reduce; i += n_reduce/2) {
+                if (smem[i] > smem[tid])
+                    smem[tid] = smem[i];
+            }
         }
+        n_reduce /= 2;
+        __syncthreads();
     }
+
+    float row_max = smem[0];
     __syncthreads();
 
-    smem[tid] = 0;
-    for (int i = row_start + tid; i < row_start + ncols; i += blockDim.x) {
-        smem[tid] += expf(input[i] - max[0]);
-    }
-    __syncthreads();
+    smem[tid] = thread_sum * expf(thread_max - row_max);
+    __syncthreads;
 
-    if (tid == 0) {
-        sum[0] = 0;
-        for (int i = 0; i < blockDim.x; i ++) {
-            sum[0] += smem[i];
+    n_reduce = blockDim.x;
+    while(n_reduce > 0) {
+        if (tid < n_reduce/2) {
+            for (int i = tid; i < n_reduce; i += n_reduce/2) {
+                if (i != tid)
+                    smem[tid] += smem[i];
+            }
         }
+        n_reduce /= 2;
+        __syncthreads();
     }
+
+    float row_sum = smem[0];
     __syncthreads();
 
     for (int i = row_start + tid; i < row_start + ncols; i += blockDim.x) {
-        output[i] = exp(input[i] - max[0]) / sum[0];
+        output[i] = exp(input[i] - row_max) / row_sum;
     }
 }
 
