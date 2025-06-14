@@ -5,16 +5,16 @@ from mul_triton import Mul as MulTriton
 
 
 def mul_forward_test(MulFunction):
-    a = torch.randn(64, 64, device="cuda", dtype=torch.float32, requires_grad=True)
-    b = torch.randn(64, 64, device="cuda", dtype=torch.float32, requires_grad=True)
+    a = torch.randn(1024, 1024, device="cuda", dtype=torch.float32, requires_grad=True)
+    b = torch.randn(1024, 1024, device="cuda", dtype=torch.float32, requires_grad=True)
     c = MulFunction.apply(a, b)
     expected = a * b
     assert torch.allclose(c, expected, rtol=1e-4, atol=1e-6), "Forward pass results do not match!"
 
 
 def mul_backward_test(MulFunction):
-    a = torch.randn(64, 64, device="cuda", dtype=torch.float32, requires_grad=True)
-    b = torch.randn(64, 64, device="cuda", dtype=torch.float32, requires_grad=True)
+    a = torch.randn(1024, 1024, device="cuda", dtype=torch.float32, requires_grad=True)
+    b = torch.randn(1024, 1024, device="cuda", dtype=torch.float32, requires_grad=True)
     c = MulFunction.apply(a, b)
     c.sum().backward()
     grad_a = a.grad.clone()

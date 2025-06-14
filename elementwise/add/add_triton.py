@@ -32,8 +32,8 @@ def triton_add_forward(x: torch.Tensor, y: torch.Tensor):
     output = torch.empty_like(x)
     assert x.device == DEVICE and y.device == DEVICE and output.device == DEVICE
     n_elements = output.numel()
-    BLOCK_SIZE = 128
-    add_forward[(BLOCK_SIZE, 1, 1)](x, y, output, n_elements, BLOCK_SIZE)
+    grid = lambda meta: (triton.cdiv(n_elements, meta['BLOCK_SIZE']),)
+    add_forward[grid](x, y, output, n_elements, BLOCK_SIZE=128)
     return output
 
 
@@ -42,8 +42,8 @@ def triton_add_backward(grad_out: torch.Tensor):
     grad_y = torch.empty_like(grad_out)
     assert grad_out.device == DEVICE and grad_x.device == DEVICE and grad_y.device == DEVICE
     n_elements = grad_out.numel()
-    BLOCK_SIZE = 128
-    add_backward[(BLOCK_SIZE, 1, 1)](grad_out, grad_x, grad_y, n_elements, BLOCK_SIZE)
+    grid = lambda meta: (triton.cdiv(n_elements, meta['BLOCK_SIZE']),)
+    add_backward[grid](grad_out, grad_x, grad_y, n_elements, BLOCK_SIZE=128)
     return grad_x, grad_y
 
 
