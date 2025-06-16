@@ -26,8 +26,8 @@ def mul_backward_test(MulFunction):
     c.sum().backward()
     expected_grad_a = a.grad.clone()
     expected_grad_b = b.grad.clone()
-    assert torch.allclose(grad_a, expected_grad_a, rtol=1e-3, atol=1e-5), "Gradient for a does not match!"
-    assert torch.allclose(grad_b, expected_grad_b, rtol=1e-3, atol=1e-5), "Gradient for b does not match!"
+    assert torch.allclose(grad_a, expected_grad_a, rtol=1e-4, atol=1e-6), "Gradient for a does not match!"
+    assert torch.allclose(grad_b, expected_grad_b, rtol=1e-4, atol=1e-6), "Gradient for b does not match!"
 
 
 def test_cuda_mul_forward():
