@@ -17,18 +17,15 @@ void softmax_sharedmem(const float *input, float *output, const int nrows, const
         }
         thread_sum += expf(elem - thread_max);
     }
+
     smem[tid] = thread_max;
     __syncthreads();
 
-    int n_reduce = blockDim.x;
-    while(n_reduce > 0) {
-        if (tid < n_reduce/2) {
-            for (int i = tid; i < n_reduce; i += n_reduce/2) {
-                if (smem[i] > smem[tid])
-                    smem[tid] = smem[i];
-            }
+    for (int n_reduce = blockDim.x; n_reduce > 1; n_reduce /= 2) {
+        if (tid < n_reduce / 2) {
+            if (smem[tid + n_reduce/2] > smem[tid])
+                smem[tid] = smem[tid + n_reduce/2];
         }
-        n_reduce /= 2;
         __syncthreads();
     }
 
@@ -36,17 +33,12 @@ void softmax_sharedmem(const float *input, float *output, const int nrows, const
     __syncthreads();
 
     smem[tid] = thread_sum * expf(thread_max - row_max);
-    __syncthreads;
+    __syncthreads();
 
-    n_reduce = blockDim.x;
-    while(n_reduce > 0) {
-        if (tid < n_reduce/2) {
-            for (int i = tid; i < n_reduce; i += n_reduce/2) {
-                if (i != tid)
-                    smem[tid] += smem[i];
-            }
+    for (int n_reduce = blockDim.x; n_reduce > 1; n_reduce /= 2) {
+        if (tid < n_reduce / 2) {
+            smem[tid] += smem[tid + n_reduce/2];
         }
-        n_reduce /= 2;
         __syncthreads();
     }
 
