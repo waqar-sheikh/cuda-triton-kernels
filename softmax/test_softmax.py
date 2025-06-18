@@ -2,6 +2,7 @@ import pytest
 import torch
 import torch.nn.functional as F
 from softmax_cuda import Softmax as SoftmaxCUDA
+from softmax_triton import Softmax as SoftmaxTriton
 
 
 def softmax_forward_test(SoftmaxFunction):
@@ -9,6 +10,11 @@ def softmax_forward_test(SoftmaxFunction):
     output = SoftmaxFunction.apply(input)
     expected = F.softmax(input, dim=1)
     assert torch.allclose(output, expected, rtol=1e-4, atol=1e-6), "Forward pass results do not match!"
+
+
+def test_triton_softmax():
+    """Test the triton softmax kernel."""
+    softmax_forward_test(SoftmaxTriton)
 
 
 def test_cuda_softmax_sharedmem():

@@ -6,7 +6,7 @@ def get_kernel_resources(kernel_func, num_warps, *args):
     kernel._init_handles()
     num_regs = kernel.n_regs
     size_smem = kernel.metadata.shared
-    return num_regs, size_smem
+    return kernel, num_regs, size_smem
 
 
 def get_num_programs(device, thread_regs, size_smem, num_warps):
