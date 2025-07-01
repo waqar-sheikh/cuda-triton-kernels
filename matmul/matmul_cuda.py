@@ -19,7 +19,7 @@ ext = load_inline(
 )
 
 class Matmul(autograd.Function):
-    _impl = 'naive'
+    _impl = 'sharedmem'
 
     @staticmethod
     def forward(ctx, A, B):

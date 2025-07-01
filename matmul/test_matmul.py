@@ -16,3 +16,9 @@ def test_cuda_matmul_naive():
     """Test the naive CUDA matmul kernel."""
     MatmulCUDA.use("naive")
     matmul_forward_test(MatmulCUDA)
+
+
+def test_cuda_matmul_sharedmem():
+    """Test the sharedmem CUDA matmul kernel."""
+    MatmulCUDA.use("sharedmem")
+    matmul_forward_test(MatmulCUDA)
