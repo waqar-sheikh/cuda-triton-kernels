@@ -19,7 +19,7 @@ ext = load_inline(
 )
 
 class Matmul(autograd.Function):
-    _impl = 'sharedmem'
+    _impl = 'threadtiling'
 
     @staticmethod
     def forward(ctx, A, B):

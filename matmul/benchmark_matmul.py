@@ -18,12 +18,17 @@ def main():
     # Benchmark naive CUDA matmul kernel
     MatmulCUDA.use("naive")
     mean = benchmark(MatmulCUDA.apply, A, B, num_steps=10, nvtx_string="naive_matmul")
-    print("naive    ", mean / 1e-6)
+    print("naive      ", mean / 1e-6)
 
-    # Benchmark sharedmem CUDA matmul kernel
-    MatmulCUDA.use("sharedmem")
-    mean = benchmark(MatmulCUDA.apply, A, B, num_steps=10, nvtx_string="sharedmem_matmul")
-    print("sharedmem", mean / 1e-6)
+    # Benchmark blocktiling based CUDA matmul kernel
+    MatmulCUDA.use("blocktiling")
+    mean = benchmark(MatmulCUDA.apply, A, B, num_steps=10, nvtx_string="blocktiling_matmul")
+    print("blocktiling", mean / 1e-6)
+
+    # Benchmark threadtiling based CUDA matmul kernel
+    MatmulCUDA.use("threadtiling")
+    mean = benchmark(MatmulCUDA.apply, A, B, num_steps=10, nvtx_string="threadtiling_matmul")
+    print("threadtiling", mean / 1e-6)
 
 if __name__ == "__main__":
     main()
