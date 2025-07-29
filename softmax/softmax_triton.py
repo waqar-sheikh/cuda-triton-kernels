@@ -44,7 +44,6 @@ def launch_triton_softmax(input: torch.Tensor):
 
     num_programs = get_num_programs(device, num_regs, size_smem, num_warps)
     num_programs = min(num_programs, num_rows)
-    num_programs = num_rows
     kernel[(num_programs, 1, 1)](input, output, input.shape, input.stride(), output.stride(), block_size)
     return output
 
