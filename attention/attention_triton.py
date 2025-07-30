@@ -23,6 +23,10 @@ def triton_flash_attention(
     pid = tl.program_id(axis=0)
     num_programs = tl.num_programs(0)
 
+    row_range = tl.arange(0, BS_SEQ).reshape([BS_SEQ, 1])
+    col_range = tl.arange(0, BS_SEQ).reshape([1, BS_SEQ])
+    causal_mask = row_range >= col_range
+
     for head_idx in range(0, num_heads):
 
         for seq_idx in tl.range(pid, seq_len//BS_SEQ, num_programs):
@@ -73,10 +77,13 @@ def triton_flash_attention(
 
             q_block = tl.load(q_block_ptr, boundary_check=(0, 1))
 
-            for kv_idx in range(0, seq_len//BS_SEQ):
+            for kv_index in range(0, seq_idx + 1):
 
                 k_block = tl.load(k_block_ptr, boundary_check=(0, 1))
                 scores = tl.dot(q_block, k_block.T) / (d_head ** 0.5)
+
+                if kv_index == seq_idx:
+                    scores = tl.where(causal_mask, scores, float('-inf'))
         
                 max = tl.maximum(row_max, tl.max(scores, axis=-1, keep_dims=True))
                 scores = tl.exp(scores - max)
